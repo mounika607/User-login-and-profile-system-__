@@ -1,0 +1,99 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_USERS 100
+#define MAX_NAME 50
+#define MAX_EMAIL 50
+#define MAX_PASS 20
+#define FILENAME "users.txt"
+
+typedef struct {
+    char name[MAX_NAME];
+    char email[MAX_EMAIL];
+    char password[MAX_PASS];
+} User;
+
+void registerUser() {
+    User user;
+    FILE *fp = fopen(FILENAME, "a");
+
+    if (fp == NULL) {
+        printf("Error opening file.\n");
+        return;
+    }
+
+    printf("Enter name: ");
+    scanf(" %[^\n]", user.name);
+    printf("Enter email: ");
+    scanf(" %s", user.email);
+    printf("Enter password: ");
+    scanf(" %s", user.password);
+
+    fprintf(fp, "%s|%s|%s\n", user.name, user.email, user.password);
+    fclose(fp);
+    printf("User registered successfully.\n");
+}
+
+int loginUser() {
+    char email[MAX_EMAIL], password[MAX_PASS];
+    User user;
+    FILE *fp = fopen(FILENAME, "r");
+
+    if (fp == NULL) {
+        printf("Error opening file.\n");
+        return 0;
+    }
+
+    printf("Enter email: ");
+    scanf(" %s", email);
+    printf("Enter password: ");
+    scanf(" %s", password);
+
+    while (fscanf(fp, "%[^|]|%[^|]|%[^\n]\n", user.name, user.email, user.password) != EOF) {
+        if (strcmp(email, user.email) == 0 && strcmp(password, user.password) == 0) {
+            printf("Login successful! Welcome, %s.\n", user.name);
+            fclose(fp);
+            return 1;
+        }
+    }
+
+    fclose(fp);
+    printf("Login failed. Invalid email or password.\n");
+    return 0;
+}
+
+void showAllUsers() {
+    User user;
+    FILE *fp = fopen(FILENAME, "r");
+
+    if (fp == NULL) {
+        printf("No users registered yet.\n");
+        return;
+    }
+
+    printf("\n--- Registered Users ---\n");
+    while (fscanf(fp, "%[^|]|%[^|]|%[^\n]\n", user.name, user.email, user.password) != EOF) {
+        printf("Name: %s, Email: %s\n", user.name, user.email);
+    }
+
+    fclose(fp);
+}
+
+int main() {
+    int choice;
+    while (1) {
+        printf("\n1. Register\n2. Login\n3. Show All Users\n4. Exit\nChoose an option: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: registerUser(); break;
+            case 2: loginUser(); break;
+            case 3: showAllUsers(); break;
+            case 4: exit(0);
+            default: printf("Invalid choice.\n");
+        }
+    }
+
+    return 0;
+}
